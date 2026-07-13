@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pošlji povpraševanje - mojaStoritev</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">mojaStoritev</div>
+            <div class="lang-switch">
+                <button onclick="switchLanguage('sl')" class="active" id="langSl">🇸🇮 Slovenščina</button>
+                <button onclick="switchLanguage('en')" id="langEn">🇬🇧 English</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="form-container">
+            <div id="formHeader">
+                <span id="formTypeBadge" class="badge">🏠 Posameznik</span>
+                <h1 id="formTitle">Pošlji povpraševanje</h1>
+                <p id="formDesc">Izpolni obrazec in mi najdemo pravi del zate.</p>
+            </div>
+
+            <form id="inquiryForm" enctype="multipart/form-data">
+                <input type="hidden" id="inquiryType" name="type" value="b2c">
+
+                <!-- B2B Fields (hidden by default) -->
+                <div id="b2bFields" style="display:none;">
+                    <div class="form-group">
+                        <label for="company" id="labelCompany">Ime podjetja *</label>
+                        <input type="text" id="company" name="company">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vat_id" id="labelVat">ID za DDV</label>
+                        <input type="text" id="vat_id" name="vat_id" placeholder="SI12345678">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity" id="labelQuantity">Količina</label>
+                        <input type="text" id="quantity" name="quantity" placeholder="npr. 20 kosov">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="frequency" id="labelFrequency">Pogostost</label>
+                        <select id="frequency" name="frequency">
+                            <option value="one-time">Enkratno</option>
+                            <option value="monthly">Mesečno</option>
+                            <option value="weekly">Tedensko</option>
+                            <option value="yearly">Letno</option>
+                        </select>
+                    </div>
+                    <hr style="border-color:#333;margin:20px 0;">
+                </div>
+
+                <div class="form-group">
+                    <label for="name" id="labelName">Ime in priimek *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone" id="labelPhone">Telefonska številka *</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" id="labelEmail">Email (po želji)</label>
+                    <input type="email" id="email" name="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="description" id="labelDesc">Opis potrebnega dela *</label>
+                    <textarea id="description" name="description" rows="4" required placeholder="Napiši, kaj potrebuješ..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="image" id="labelImage">Naloži sliko</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+                    <small id="imageHint">Podprite formati: JPG, PNG, GIF (maks. 5MB)</small>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Pošlji povpraševanje</button>
+            </form>
+
+            <div id="successMessage" style="display:none;">
+                <h2>✅ Povpraševanje poslano!</h2>
+                <p>Kmalu te bomo kontaktirali s ponudbo.</p>
+                <a href="/" class="cta-btn" style="display:inline-block;margin-top:20px;padding:12px 30px;">← Nazaj na domov</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 mojaStoritev • Vse pravice pridržane</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Detect which type from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const inquiryType = urlParams.get('type') || 'b2c';
+        
+        document.getElementById('inquiryType').value = inquiryType;
+        
+        if (inquiryType === 'b2b') {
+            document.getElementById('b2bFields').style.display = 'block';
+            document.getElementById('formTypeBadge').textContent = '🏢 Podjetje';
+            document.getElementById('formTypeBadge').style.background = 'rgba(0,255,200,0.15)';
+            document.getElementById('formTypeBadge').style.color = '#00ffcc';
+            
+            // Make company field required
+            document.getElementById('company').required = true;
+        }
+
+        // Form submission
+        document.getElementById('inquiryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Pošiljanje...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/inquiries', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    e.target.style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                } else {
+                    alert('Napaka pri pošiljanju. Poskusi ponovno.');
+                }
+            } catch (error) {
+                alert('Napaka pri pošiljanju. Poskusi ponovno.');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
