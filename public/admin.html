@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - mojaStoritev</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .inquiry-card {
+            background: #1a1a2e;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #00ffcc;
+        }
+        .inquiry-card.b2b { border-left-color: #ffcc00; }
+        .inquiry-card.new { border-left-color: #ffcc00; }
+        .inquiry-card.quoted { border-left-color: #00ccff; }
+        .inquiry-card.ordered { border-left-color: #00ff88; }
+        .inquiry-card.delivered { border-left-color: #888; }
+        
+        .inquiry-card img {
+            max-width: 200px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .inquiry-card .type-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .type-badge.b2c { background: rgba(0,255,200,0.15); color: #00ffcc; }
+        .type-badge.b2b { background: rgba(255,200,0,0.15); color: #ffcc00; }
+        .status-select {
+            padding: 5px 10px;
+            border-radius: 4px;
+            background: #0a0a0f;
+            color: #fff;
+            border: 1px solid #333;
+        }
+        .reply-textarea {
+            width: 100%;
+            padding: 8px;
+            background: #0a0a0f;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .save-btn {
+            background: #00ffcc;
+            color: #000;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .login-form {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background: #1a1a2e;
+            border-radius: 10px;
+        }
+        .login-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #0a0a0f;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 4px;
+        }
+        .login-form button {
+            width: 100%;
+            padding: 10px;
+            background: #00ffcc;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-bar button {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #888;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .filter-bar button.active {
+            background: rgba(0,255,200,0.15);
+            border-color: #00ffcc;
+            color: #00ffcc;
+        }
+        .pending-count {
+            background: #ffcc00;
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #1a1a2e;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .stat-card .label {
+            color: #666;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .stat-card.b2c .number { color: #00ffcc; }
+        .stat-card.b2b .number { color: #ffcc00; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Login -->
+        <div id="loginForm" class="login-form">
+            <h2 style="color:#00ffcc;">Admin Login</h2>
+            <input type="password" id="adminPassword" placeholder="Geslo">
+            <button onclick="login()">Prijava</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" style="display:none;">
+            <header>
+                <nav>
+                    <div class="logo">mojaStoritev Admin</div>
+                    <div>
+                        <span id="pendingBadge" class="pending-count">0</span>
+                        <button onclick="logout()" style="background:transparent;border:1px solid #ff4444;color:#ff4444;padding:5px 15px;border-radius:4px;cursor:pointer;">Odjava</button>
+                    </div>
+                </nav>
+            </header>
+
+            <div class="admin-container">
+                <h2>📊 Statistika</h2>
+                <div class="stats">
+                    <div class="stat-card b2c">
+                        <div class="number" id="b2cCount">0</div>
+                        <div class="label">🏠 Posamezniki</div>
+                    </div>
+                    <div class="stat-card b2b">
+                        <div class="number" id="b2bCount">0</div>
+                        <div class="label">🏢 Podjetja</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="totalCount">0</div>
+                        <div class="label">📋 Skupaj</div>
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <button class="active" data-filter="all" onclick="filterInquiries('all')">📋 Vsi</button>
+                    <button data-filter="b2c" onclick="filterInquiries('b2c')">🏠 Posamezniki</button>
+                    <button data-filter="b2b" onclick="filterInquiries('b2b')">🏢 Podjetja</button>
+                    <button data-filter="new" onclick="filterInquiries('new')">🆕 Nova</button>
+                </div>
+
+                <div id="inquiriesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let inquiries = [];
+        let currentFilter = 'all';
+        const password = 'admin123';
+
+        function login() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === password) {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadInquiries();
+            } else {
+                alert('Napačno geslo!');
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        function filterInquiries(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-bar button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderInquiries();
+        }
+
+        async function loadInquiries() {
+            const response = await fetch(`/api/inquiries?password=${password}`);
+            inquiries = await response.json();
+            updateStats();
+            renderInquiries();
+        }
+
+        function updateStats() {
+            const b2c = inquiries.filter(i => i.type === 'b2c').length;
+            const b2b = inquiries.filter(i => i.type === 'b2b').length;
+            const pending = inquiries.filter(i => i.status === 'new').length;
+            
+            document.getElementById('b2cCount').textContent = b2c;
+            document.getElementById('b2bCount').textContent = b2b;
+            document.getElementById('totalCount').textContent = inquiries.length;
+            document.getElementById('pendingBadge').textContent = pending;
+        }
+
+        function renderInquiries() {
+            const container = document.getElementById('inquiriesList');
+            
+            let filtered = inquiries;
+            if (currentFilter === 'b2c') {
+                filtered = inquiries.filter(i => i.type === 'b2c');
+            } else if (currentFilter === 'b2b') {
+                filtered = inquiries.filter(i => i.type === 'b2b');
+            } else if (currentFilter === 'new') {
+                filtered = inquiries.filter(i => i.status === 'new');
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="color:#666;text-align:center;padding:40px;">Ni povpraševanj.</p>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(inq => `
+                <div class="inquiry-card ${inq.type} ${inq.status || 'new'}">
+                    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                        <div>
+                            <span class="type-badge ${inq.type}">${inq.type === 'b2b' ? '🏢 B2B' : '🏠 B2C'}</span>
+                            <strong>${inq.name}</strong> • ${inq.phone}
+                            ${inq.email ? `• ${inq.email}` : ''}
+                        </div>
+                        <div>
+                            <select class="status-select" data-id="${inq.id}" onchange="updateStatus(${inq.id}, this.value)">
+                                <option value="new" ${inq.status === 'new' ? 'selected' : ''}>🆕 Novo</option>
+                                <option value="quoted" ${inq.status === 'quoted' ? 'selected' : ''}>💬 Ponudba</option>
+                                <option value="ordered" ${inq.status === 'ordered' ? 'selected' : ''}>📦 Naročeno</option>
+                                <option value="delivered" ${inq.status === 'delivered' ? 'selected' : ''}>✅ Dostavljeno</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    ${inq.company ? `<p><strong>🏢 Podjetje:</strong> ${inq.company} ${inq.vat_id ? `(ID: ${inq.vat_id})` : ''}</p>` : ''}
+                    ${inq.quantity ? `<p><strong>📦 Količina:</strong> ${inq.quantity} • ${inq.frequency || 'enkratno'}</p>` : ''}
+                    
+                    <p><strong>Opis:</strong> ${inq.description}</p>
+                    ${inq.image_path ? `<img src="/uploads/${inq.image_path}" alt="Slika dela">` : ''}
+                    <p><small>📅 ${new Date(inq.created_at).toLocaleString('sl-SI')}</small></p>
+                    
+                    <div style="margin-top:10px;">
+                        <textarea class="reply-textarea" id="reply-${inq.id}" placeholder="Dodaj odgovor...">${inq.reply || ''}</textarea>
+                        <button class="save-btn" onclick="saveReply(${inq.id})">💾 Shrani odgovor</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updateStatus(id, status) {
+            await fetch(`/api/inquiries/${id}?password=${password}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            loadInquiries();
+        }
+
+        async function saveReply(id) {
+            const reply = document.getElementById(`reply-${id}`).value;
+            await fetch(`/api/inquiries/${id}?password=${password}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reply })
+            });
+            alert('✅ Odgovor shranjen!');
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadInquiries, 30000);
+    </script>
+</body>
+</html>
