@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mojaStoritev - Poiščemo pravi del zate</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">mojaStoritev</div>
+            <div class="lang-switch">
+                <button onclick="switchLanguage('sl')" class="active" id="langSl">🇸🇮 Slovenščina</button>
+                <button onclick="switchLanguage('en')" id="langEn">🇬🇧 English</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1 id="heroTitle">Najdemo pravi del zate</h1>
+            <p id="heroDesc">Pošlji nam sliko ali opis in mi poiščemo najboljšo ceno zate.</p>
+        </section>
+
+        <section class="choice-section">
+            <div class="choice-card" onclick="goToForm('b2c')">
+                <span class="choice-icon">🏠</span>
+                <h2 id="b2cTitle">Za posameznike</h2>
+                <p id="b2cDesc">Potrebuješ en del za dom? Pošlji povpraševanje.</p>
+                <button class="choice-btn" id="b2cBtn">Pošlji povpraševanje →</button>
+            </div>
+
+            <div class="choice-card b2b" onclick="goToForm('b2b')">
+                <span class="choice-icon">🏢</span>
+                <h2 id="b2bTitle">Za podjetja</h2>
+                <p id="b2bDesc">Potrebuješ dele za svoje podjetje? Pošlji povpraševanje.</p>
+                <button class="choice-btn b2b-btn" id="b2bBtn">Pošlji povpraševanje →</button>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature">
+                <span class="icon">📸</span>
+                <h3 id="f1Title">Naloži sliko</h3>
+                <p id="f1Desc">Slikaj del, ki ga potrebuješ.</p>
+            </div>
+            <div class="feature">
+                <span class="icon">🔍</span>
+                <h3 id="f2Title">Mi poiščemo</h3>
+                <p id="f2Desc">Najdemo najcenejšo opcijo zate.</p>
+            </div>
+            <div class="feature">
+                <span class="icon">💶</span>
+                <h3 id="f3Title">Prihraniš denar</h3>
+                <p id="f3Desc">Dobiš najboljšo ceno brez iskanja.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 mojaStoritev • Vse pravice pridržane</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        function goToForm(type) {
+            window.location.href = `/form?type=${type}`;
+        }
+    </script>
+</body>
+</html>
